@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumiq – проект интеллектуального устройства</title>
+  <meta name="description" content="Lumiq – интеллектуальное устройство для персонализированного ухода за комнатными растениями." />
+  <style>
+    :root{
+      --bg:#111614;
+      --bg-2:#1a211d;
+      --panel:#202823cc;
+      --panel-solid:#202823;
+      --panel-soft:#2a342e;
+      --line:rgba(216,226,220,.10);
+      --line-2:rgba(216,226,220,.18);
+      --text:#edf2ee;
+      --muted:#a8b5ad;
+      --accent:#345743;
+      --accent-2:#4f6b5a;
+      --accent-3:#7f9588;
+      --oled:#74c8ff;
+      --oled-soft:rgba(116,200,255,.2);
+      --success:#7bb38e;
+      --warning:#cfaa63;
+      --danger:#cb8686;
+      --shadow:0 24px 64px rgba(0,0,0,.36);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(61,91,73,.22), transparent 26%),
+        radial-gradient(circle at 85% 0%, rgba(95,112,103,.16), transparent 22%),
+        linear-gradient(180deg, #121715 0%, #161c19 35%, #101412 100%);
+      overflow-x:hidden;
+    }
+
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+
+    .wrap{
+      width:min(1180px, calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .nav{
+      position:sticky;
+      top:14px;
+      z-index:60;
+      margin-top:14px;
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:12px 16px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(24,31,27,.72);
+      box-shadow:0 12px 30px rgba(0,0,0,.22);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      letter-spacing:.03em;
+    }
+
+    .brand-mark{
+      width:36px;height:36px;border-radius:12px;
+      display:grid;place-items:center;
+      background:linear-gradient(145deg,#2f3f37,#4e6558);
+      border:1px solid var(--line);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+
+    .nav-links{
+      display:flex;
+      gap:18px;
+      font-size:14px;
+      color:var(--muted);
+    }
+    .nav-links a:hover{color:var(--text)}
+
+    .hero{
+      min-height:780px;
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      align-items:center;
+      gap:48px;
+      padding:76px 0 82px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(47,63,55,.65);
+      border:1px solid var(--line);
+      color:#d7e1db;
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.02em;
+    }
+
+    h1{
+      font-size:clamp(58px,8vw,108px);
+      line-height:.9;
+      letter-spacing:-.06em;
+      margin:22px 0 16px;
+    }
+    h1 span{color:#8ea89a}
+    .hero-lead{
+      max-width:650px;
+      font-size:clamp(20px,2.4vw,28px);
+      line-height:1.22;
+      color:#d9e2dc;
+      margin:0 0 18px;
+      letter-spacing:-.02em;
+    }
+    .hero-copy{
+      max-width:640px;
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.75;
+    }
+    .hero-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:26px;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      border-radius:15px;
+      padding:14px 18px;
+      cursor:pointer;
+      font-weight:750;
+      transition:.25s ease;
+    }
+    .btn.primary{
+      background:linear-gradient(180deg,#3a4f44,#2d3f36);
+      color:#f4f8f5;
+      box-shadow:0 12px 28px rgba(0,0,0,.25);
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+    }
+    .btn:hover{transform:translateY(-2px)}
+
+    .hero-visual{
+      position:relative;
+      min-height:650px;
+      display:grid;
+      place-items:center;
+    }
+    .halo{
+      position:absolute;
+      width:480px;height:480px;border-radius:50%;
+      background:radial-gradient(circle, rgba(59,84,70,.55), rgba(59,84,70,0) 68%);
+      filter:blur(14px);
+      animation:breathe 5s ease-in-out infinite;
+    }
+    @keyframes breathe{
+      0%,100%{transform:scale(.96);opacity:.8}
+      50%{transform:scale(1.05);opacity:1}
+    }
+
+    .product{position:relative;width:360px;height:620px;z-index:2}
+
+    .plant-leaf{
+      position:absolute;
+      width:145px;height:96px;
+      background:linear-gradient(145deg,#56785f,#30513c);
+      border-radius:80% 12% 80% 12%;
+      transform-origin:15% 80%;
+      opacity:.95;
+      box-shadow: inset 0 -12px 28px rgba(0,0,0,.18);
+    }
+    .l1{left:40px;top:130px;transform:rotate(-30deg)}
+    .l2{right:-40px;top:185px;transform:scaleX(-1) rotate(-25deg)}
+    .l3{left:40px;top:268px;transform:rotate(-12deg) scale(.9)}
+    .l4{right:-40px;top:332px;transform:scaleX(-1) rotate(-9deg) scale(.82)}
+
+    .stick{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:70px;
+      width:54px;height:455px;
+      border-radius:28px;
+      background:linear-gradient(90deg,#bcc6c0,#8f9992 50%,#d6ddd8);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.16),0 24px 45px rgba(0,0,0,.22);
+    }
+    .segment{
+      position:absolute;
+      left:8px;width:38px;height:74px;border-radius:18px;
+      background:linear-gradient(90deg,#b7c1bb,#97a19b 50%,#ced5d0);
+      border:1px solid rgba(0,0,0,.10);
+    }
+    .s1{top:180px}.s2{top:255px}.s3{top:330px}
+
+    .head{
+      position:absolute;top:0;left:50%;
+      transform:translate(-50%,-30px);
+      width:128px;height:154px;border-radius:34px;
+      background:linear-gradient(145deg,#e6ebe7,#bac5be);
+      border:1px solid rgba(0,0,0,.10);
+      box-shadow:0 22px 50px rgba(0,0,0,.28);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    }
+    .sensor-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#698677;
+      box-shadow:0 0 0 5px rgba(105,134,119,.14);
+    }
+
+    .oled{
+      width:88px;height:60px;
+      background:#071119;
+      border-radius:14px;
+      border:3px solid #24313a;
+      display:grid;place-items:center;
+      color:var(--oled);
+      box-shadow:inset 0 0 28px var(--oled-soft),0 0 16px rgba(116,200,255,.06);
+      overflow:hidden;
+    }
+
+    .oled-face{
+      display:grid;
+      place-items:center;
+      width:100%;
+      height:100%;
+      transform-origin:center;
+      animation:blink 5.5s infinite;
+    }
+    @keyframes blink{
+      0%,47%,51%,100%{transform:scaleY(1)}
+      49%{transform:scaleY(.08)}
+    }
+
+    .charge{
+      position:absolute;top:55px;right:-74px;
+      display:flex;align-items:center;gap:8px;
+      animation:floatCharge 3.2s ease-in-out infinite;
+    }
+    @keyframes floatCharge{
+      0%,100%{transform:translateX(0)}
+      50%{transform:translateX(-7px)}
+    }
+    .puck{
+      width:38px;height:38px;border-radius:50%;
+      background:#29322d;
+      border:1px solid var(--line-2);
+      box-shadow:0 10px 24px rgba(0,0,0,.24);
+      position:relative;
+    }
+    .puck:before,.puck:after{
+      content:"";position:absolute;top:16px;
+      width:4px;height:4px;border-radius:50%;background:#b3c1ba;
+    }
+    .puck:before{left:12px}.puck:after{right:12px}
+    .cable{width:75px;height:4px;border-radius:4px;background:#7b8580}
+
+    .clip{
+      position:absolute;left:49px;width:44px;height:10px;border-radius:8px;
+      background:#65816e;transform:rotate(4deg);opacity:.95;
+    }
+    .c1{top:175px}.c2{top:290px}
+
+    .pot{
+      position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+      width:260px;height:160px;
+      background:linear-gradient(180deg,#8b908a,#59605a);
+      border-radius:30px 30px 64px 64px;
+      box-shadow:0 30px 50px rgba(0,0,0,.30);
+    }
+    .soil{
+      position:absolute;top:-8px;left:20px;right:20px;height:30px;
+      border-radius:50%;
+      background:#4a3c31;
+      box-shadow:inset 0 4px 10px rgba(0,0,0,.32);
+    }
+
+    .section{padding:50px 0}
+    .section-head{max-width:760px;margin-bottom:40px}
+    .section-kicker{
+      color:#97aea2;
+      text-transform:uppercase;
+      font-size:12px;
+      letter-spacing:.18em;
+      font-weight:800;
+    }
+    .section h2{
+      font-size:clamp(38px,5vw,64px);
+      letter-spacing:-.045em;
+      margin:10px 0 14px;
+      line-height:1.02;
+    }
+    .section-head p{
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.72;
+      margin:0;
+    }
+
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{
+      padding:24px;border-radius:24px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+    }
+    .card h3{margin:10px 0 8px;font-size:20px}
+    .card p{margin:0;color:var(--muted);line-height:1.65}
+    .problem-icon{
+      font-size:34px;width:54px;height:54px;border-radius:18px;
+      background:#2a342f;display:grid;place-items:center;
+      border:1px solid var(--line);
+    }
+
+    .flow{
+      display:grid;grid-template-columns:repeat(5,1fr);
+      align-items:center;gap:12px;
+    }
+    .flow-item{
+      padding:18px 16px;border-radius:20px;
+      background:var(--panel-solid);
+      border:1px solid var(--line);
+      text-align:center;min-height:120px;
+      display:flex;flex-direction:column;justify-content:center;gap:8px;
+      position:relative;
+      box-shadow:var(--shadow);
+    }
+    .flow-item:not(:last-child):after{
+      content:"→";position:absolute;
+      right:-22px;top:50%;transform:translateY(-50%);
+      color:#708278;font-size:24px;z-index:3;
+    }
+    .flow-item small{color:var(--muted)}
+    .flow-icon{font-size:28px}
+
+    .architecture{
+      display:grid;grid-template-columns:.9fr 1.1fr;
+      gap:28px;align-items:center;
+    }
+    .device-stack{
+      min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+      border-radius:32px;
+      background:linear-gradient(180deg,rgba(38,47,42,.78),rgba(29,36,32,.88));
+      border:1px solid var(--line);
+      position:relative;overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .module-box{
+      width:210px;padding:18px;border-radius:24px;
+      background:#27312c;border:1px solid var(--line);
+      text-align:center;
+      box-shadow:0 14px 30px rgba(0,0,0,.24);
+      transform:translateY(18px);opacity:0;transition:.7s ease;
+    }
+    .reveal.visible .module-box{transform:translateY(0);opacity:1}
+    .module-box:nth-child(2){transition-delay:.15s}
+    .module-box:nth-child(3){transition-delay:.3s}
+    .module-line{
+      width:6px;height:58px;border-radius:8px;
+      background:linear-gradient(180deg,#839088,#66726b);
+      transform:scaleY(0);transform-origin:top;transition:.6s ease .25s;
+    }
+    .reveal.visible .module-line{transform:scaleY(1)}
+
+    .feature-list{display:grid;gap:14px}
+    .feature{
+      display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;
+      padding:16px 0;border-bottom:1px solid var(--line);
+    }
+    .feature-num{
+      width:38px;height:38px;border-radius:12px;
+      display:grid;place-items:center;background:#29342f;color:#dfe7e2;font-weight:800;
+      border:1px solid var(--line);
+    }
+
+    .components{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+    }
+    .component{min-height:220px;display:flex;flex-direction:column;justify-content:space-between}
+    .component .chip{
+      width:56px;height:56px;border-radius:16px;
+      background:linear-gradient(145deg,#33413a,#26312c);
+      border:1px solid var(--line);
+      display:grid;place-items:center;font-size:26px;
+    }
+    .component .tag{
+      display:inline-block;width:max-content;
+      margin-top:12px;padding:6px 10px;border-radius:999px;
+      background:#2b3530;color:#c4d1ca;font-size:12px;font-weight:700;
+      border:1px solid var(--line);
+    }
+
+    .interactive{
+      display:grid;grid-template-columns:.9fr 1.1fr;gap:26px;align-items:stretch;
+    }
+    .face-panel{
+      min-height:500px;display:grid;place-items:center;
+      background:linear-gradient(145deg,#111714,#0a0f0d);
+      border-radius:32px;color:white;position:relative;overflow:hidden;padding:30px;
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+    .face-panel:before{
+      content:"";position:absolute;inset:auto -10% -30% auto;
+      width:300px;height:300px;border-radius:50%;
+      background:radial-gradient(circle,rgba(116,200,255,.14),transparent 68%);
+    }
+    .face-screen{
+      width:290px;height:190px;border-radius:28px;
+      border:5px solid #22313b;
+      display:grid;place-items:center;
+      color:var(--oled);
+      box-shadow:inset 0 0 40px var(--oled-soft), 0 0 28px rgba(116,200,255,.04);
+      background:#061018;
+      overflow:hidden;
+      position:relative;
+    }
+    .face-svg{
+      width:88%;height:88%;
+      display:block;
+      filter: drop-shadow(0 0 8px rgba(116,200,255,.18));
+    }
+
+    .controls{display:flex;flex-direction:column;gap:18px}
+    .control-group{
+      padding:22px;border-radius:22px;
+      background:var(--panel-solid);border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+    .control-group label{display:block;font-weight:800;margin-bottom:12px}
+    .face-buttons{display:flex;gap:8px;flex-wrap:wrap}
+    .mini-btn{
+      border:1px solid var(--line);
+      background:#27312c;
+      padding:10px 12px;border-radius:12px;cursor:pointer;color:#d6dfd9;
+    }
+    .mini-btn.active{
+      background:#3f5448;color:white;border-color:#51695b;
+    }
+    .range-wrap{
+      display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
+    }
+    input[type=range]{
+      width:100%;
+      accent-color:#79b5da;
+    }
+    .status-text{
+      font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:8px;
+    }
+
+    .phone-section{
+      display:grid;grid-template-columns:1fr .8fr;gap:36px;align-items:center;
+    }
+    .phone{
+      width:300px;margin:auto;border-radius:42px;padding:12px;
+      background:#0f1412;box-shadow:0 30px 80px rgba(0,0,0,.34);
+    }
+    .phone-screen{
+      min-height:590px;border-radius:34px;background:#1d2521;padding:18px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.04);
+    }
+    .phone-top{
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;
+    }
+    .plant-card{
+      padding:18px;background:#26302b;border:1px solid var(--line);border-radius:22px;margin-bottom:12px;
+    }
+    .metric-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .metric{
+      padding:14px;border-radius:18px;background:#303c35;border:1px solid var(--line);
+    }
+    .metric b{display:block;font-size:22px;margin-top:4px}
+    .chart{
+      height:140px;display:flex;align-items:end;gap:6px;margin-top:16px;
+    }
+    .bar{
+      flex:1;border-radius:7px 7px 3px 3px;
+      background:linear-gradient(180deg,#7ac1f0,#4b86ac);
+      animation:rise 1.4s ease both;
+    }
+    @keyframes rise{from{height:0!important}}
+
+    .roadmap{display:grid;gap:16px;position:relative}
+    .roadmap:before{
+      content:"";position:absolute;left:22px;top:22px;bottom:22px;width:2px;background:#415048;
+    }
+    .road-step{
+      display:grid;grid-template-columns:46px 1fr;gap:16px;align-items:start;position:relative;
+    }
+    .dot{
+      width:46px;height:46px;border-radius:50%;
+      background:#2c3631;border:1px solid var(--line);
+      display:grid;place-items:center;font-weight:800;z-index:2;
+      box-shadow:0 8px 20px rgba(0,0,0,.24);
+    }
+    .road-content{
+      padding:18px 20px;border-radius:20px;background:#202823;border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .future{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    }
+
+    footer{
+      padding:78px 0 42px;text-align:center;
+    }
+    .footer-title{
+      font-size:clamp(48px,7vw,88px);font-weight:850;letter-spacing:-.05em;margin-bottom:10px;
+    }
+    .footer-sub{color:var(--muted);font-size:18px}
+
+    .reveal{
+      opacity:0;transform:translateY(24px);
+      transition:opacity .8s ease, transform .8s ease;
+    }
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .fade-delay-1{transition-delay:.08s}
+    .fade-delay-2{transition-delay:.16s}
+    .fade-delay-3{transition-delay:.24s}
+
+    @media (max-width:980px){
+      .hero,.architecture,.interactive,.phone-section{grid-template-columns:1fr}
+      .grid-3{grid-template-columns:1fr}
+      .components{grid-template-columns:repeat(2,1fr)}
+      .flow{grid-template-columns:1fr 1fr}
+      .flow-item:after{display:none}
+      .future{grid-template-columns:1fr 1fr}
+      .nav-links{display:none}
+    }
+    @media (max-width:620px){
+      .wrap{width:min(100% - 20px,1180px)}
+      .hero{min-height:auto;padding-bottom:54px}
+      .hero h1{font-size:66px}
+      .hero-lead{font-size:22px}
+      .hero-visual{transform:scale(.9);margin:-30px 0}
+      .components,.future,.flow{grid-template-columns:1fr}
+      .face-screen{width:230px;height:150px}
+      .section{padding:74px 0}
+      .section h2{font-size:42px}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-mark">◉</div>
+        <span>Lumiq</span>
+      </div>
+      <div class="nav-links">
+        <a href="#idea">Идея</a>
+        <a href="#architecture">Архитектура</a>
+        <a href="#components">Компоненты</a>
+        <a href="#oled">OLED</a>
+        <a href="#roadmap">Roadmap</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="wrap hero">
+      <div class="reveal visible">
+        <h1>Lu<span>miq</span></h1>
+        <p class="hero-lead">Умная опора для комнатных растений, помогающая понять, когда им действительно нужна вода.</p>
+        <p class="hero-copy">
+          Lumiq измеряет влажность грунта, хранит историю поливов и помогает определить,
+          комфортно ли конкретному растению сейчас. Состояние видно прямо на OLED-дисплее,
+          а подробная история доступна в мобильном приложении.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#idea">Посмотреть концепцию</a>
+          <a class="btn secondary" href="#components">Из чего состоит</a>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal visible">
+        <div class="halo"></div>
+        <div class="product">
+          <div class="plant-leaf l1"></div>
+          <div class="plant-leaf l2"></div>
+          <div class="plant-leaf l3"></div>
+          <div class="plant-leaf l4"></div>
+
+          <div class="stick">
+            <div class="head">
+              <div class="sensor-dot"></div>
+              <div class="oled"><div class="oled-face" id="heroFace"></div></div>
+            </div>
+
+            <div class="segment s1"></div>
+            <div class="segment s2"></div>
+            <div class="segment s3"></div>
+
+            <div class="clip c1"></div>
+            <div class="clip c2"></div>
+          </div>
+
+          <div class="pot"><div class="soil"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="idea">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="section-kicker">Проблема</div>
+          <h2>Вы идёте мимо растения и возникает вопрос: «Поливать сейчас или нет?»</h2>
+          <p>
+            Lumiq вырос из реальной бытовой задачи: при загруженном графике легко забыть,
+            когда растение поливали в последний раз, а визуальная оценка грунта часто оказывается неточной.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card reveal fade-delay-1">
+            <h3>История теряется</h3>
+            <p>При каждом поливе приходится вспоминать, когда растение получало воду в последний раз.</p>
+          </div>
+          <div class="card reveal fade-delay-2">
+            <h3>Оценка на глаз</h3>
+            <p>Сухой верхний слой грунта ещё не означает, что корневая зона уже нуждается в воде.</p>
+          </div>
+          <div class="card reveal fade-delay-3">
+            <h3>Сигналы поздние</h3>
+            <p>О переливе или пересушивании часто становится понятно только после ухудшения состояния растения.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="section-kicker">Принцип работы</div>
+          <h2>Измерение</h2>
+          <h2>Интерпретация</h2>
+          <h2>Понятный сигнал</h2>
+        </div>
+
+        <div class="flow reveal">
+          <div class="flow-item"><div class="flow-icon">🪴</div><b>Грунт</b><small>состояние земляного кома</small></div>
+          <div class="flow-item"><div class="flow-icon">💧</div><b>Датчик</b><small>измеряет влажность</small></div>
+          <div class="flow-item"><div class="flow-icon">⚙️</div><b>STM32</b><small>обрабатывает показания</small></div>
+          <div class="flow-item"><div class="flow-icon">📺</div><b>OLED</b><small>показывает состояние</small></div>
+          <div class="flow-item"><div class="flow-icon">📱</div><b>Приложение</b><small>хранит историю и настройки</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="architecture">
+      <div class="wrap architecture">
+        <div class="device-stack reveal">
+          <div class="module-box">
+            <strong>Smart Head</strong>
+            <div style="color:var(--muted);margin-top:6px">STM32 · OLED · аккумулятор · магнитная зарядка</div>
+          </div>
+          <div class="module-line"></div>
+          <div class="module-box">
+            <strong>Extension Segments</strong>
+            <div style="color:var(--muted);margin-top:6px">модульное удлинение и поддержка растения</div>
+          </div>
+          <div class="module-line"></div>
+          <div class="module-box">
+            <strong>Soil Probe</strong>
+            <div style="color:var(--muted);margin-top:6px">датчик влажности грунта</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-head reveal">
+            <div class="section-kicker">Архитектура</div>
+            <h2>Модульная конструкция Lumiq</h2>
+            <p>
+              Верхний модуль отделён от сенсорной части. Между ними можно добавлять сегменты,
+              увеличивая высоту опоры по мере роста растения.
+            </p>
+          </div>
+
+          <div class="feature-list">
+            <div class="feature reveal">
+              <div class="feature-num">1</div>
+              <div><b>Smart Head</b><div style="color:var(--muted);margin-top:4px">Электроника расположена выше грунта и лучше защищена от постоянной влаги.</div></div>
+            </div>
+            <div class="feature reveal">
+              <div class="feature-num">2</div>
+              <div><b>Сегменты удлинения</b><div style="color:var(--muted);margin-top:4px">Палка увеличивается по длине и одновременно служит опорой для растения.</div></div>
+            </div>
+            <div class="feature reveal">
+              <div class="feature-num">3</div>
+              <div><b>Сменный нижний модуль</b><div style="color:var(--muted);margin-top:4px">Soil Probe можно заменить отдельно от основной электроники.</div></div>
+            </div>
+            <div class="feature reveal">
+              <div class="feature-num">4</div>
+              <div><b>Магнитная зарядка</b><div style="color:var(--muted);margin-top:4px">Не требуется вытаскивать устройство из горшка для зарядки.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="components">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="section-kicker">Компоненты</div>
+          <h2>Основа первого прототипа</h2>
+        </div>
+
+        <div class="components">
+          <div class="card component reveal">
+            <div><div class="chip">🧠</div><h3>STM32</h3><p>Главный микроконтроллер: получает данные датчика, управляет OLED-дисплеем и обеспечивает взаимодействие с приложением.</p></div>
+          </div>
+          <div class="card component reveal">
+            <div><div class="chip">📺</div><h3>OLED SSD1306</h3><p>0.96″, 128×64, I²C. Дисплей для визуального отображения состояния растения.</p></div>
+          </div>
+          <div class="card component reveal">
+            <div><div class="chip">💧</div><h3>Capacitive Sensor</h3><p>Ёмкостный датчик влажности грунта для оценки состояния земляного кома.</p></div>
+          </div>
+          <div class="card component reveal">
+            <div><div class="chip">🔋</div><h3>LiPo 3.7 V</h3><p>Аккумулятор 1000 mAh для автономной работы устройства.</p></div>
+          </div>
+          <div class="card component reveal">
+            <div><div class="chip">⚡</div><h3>TP4056</h3><p>Плата зарядки USB Type-C с защитой для LiPo-аккумулятора.</p></div>
+          </div>
+          <div class="card component reveal">
+            <div><div class="chip">🧲</div><h3>Magnetic Pogo</h3><p>Магнитный разъём для удобного и наглядного пользовательского сценария зарядки.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="oled">
+      <div class="wrap interactive">
+        <div class="face-panel reveal">
+          <div>
+            <div class="face-screen" id="faceScreen"></div>
+            <div style="text-align:center;color:#8ea2ae;margin-top:18px">OLED-дисплей Lumiq</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="section-head reveal" style="margin-bottom:0">
+            <div class="section-kicker">Интерфейс</div>
+            <h2>Состояние растения видно без телефона</h2>
+            <p>OLED-мордочка помогает с первого взгляда понять, комфортно ли растению, нужен ли полив или грунт слишком влажный.</p>
+          </div>
+
+          <div class="control-group reveal">
+            <label>Влажность грунта</label>
+            <div class="range-wrap">
+              <input id="moistureRange" type="range" min="0" max="100" value="58" />
+              <b><span id="moistureValue">58</span>%</b>
+            </div>
+            <div class="status-text" id="statusText">Всё хорошо</div>
+          </div>
+
+          <div class="control-group reveal">
+            <label>Вариант мордочки</label>
+            <div class="face-buttons">
+              <button class="mini-btn active" data-face="smile">Смайлик</button>
+              <button class="mini-btn" data-face="cat">Кот</button>
+              <button class="mini-btn" data-face="dog">Собака</button>
+            </div>
+          </div>
+
+          <div class="control-group reveal">
+            <label>Идея развития интерфейса</label>
+            <p style="margin:0;color:var(--muted);line-height:1.6">
+              В приложении можно будет выбирать готовые мордочки и в перспективе создавать собственные стилизованные варианты.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap phone-section">
+        <div>
+          <div class="section-head reveal">
+            <div class="section-kicker">Приложение</div>
+            <h2>Телефон нужен для истории и настроек</h2>
+            <p>
+              В приложении хранится история влажности и поливов, можно выбрать растение,
+              поменять визуальный стиль OLED и посмотреть накопленную аналитику.
+            </p>
+          </div>
+
+          <div class="feature-list">
+            <div class="feature reveal">
+              <div class="feature-num">A</div>
+              <div><b>История поливов</b><div style="color:var(--muted);margin-top:4px">Когда растение получало воду и как менялась влажность после этого.</div></div>
+            </div>
+            <div class="feature reveal">
+              <div class="feature-num">B</div>
+              <div><b>Профиль растения</b><div style="color:var(--muted);margin-top:4px">Название, особенности, история и индивидуальная динамика.</div></div>
+            </div>
+            <div class="feature reveal">
+              <div class="feature-num">C</div>
+              <div><b>Настройка Lumiq</b><div style="color:var(--muted);margin-top:4px">Параметры устройства, интерфейс и базовые пользовательские настройки.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phone reveal">
+          <div class="phone-screen">
+            <div class="phone-top">
+              <div><b>Lumiq</b><div style="color:var(--muted);font-size:12px">Спатифиллум</div></div>
+              <div style="font-size:28px">🌿</div>
+            </div>
+
+            <div class="plant-card">
+              <div style="color:var(--muted);font-size:13px">Сейчас</div>
+              <div style="font-size:28px;font-weight:850;margin-top:4px">Всё хорошо</div>
+              <div style="color:var(--muted);margin-top:4px">Полив пока не требуется</div>
+            </div>
+
+            <div class="metric-row">
+              <div class="metric">
+                <span style="color:var(--muted);font-size:12px">Влажность</span>
+                <b>58%</b>
+              </div>
+              <div class="metric">
+                <span style="color:var(--muted);font-size:12px">Последний полив</span>
+                <b style="font-size:18px">3 дня</b>
+              </div>
+            </div>
+
+            <div class="plant-card" style="margin-top:12px">
+              <b>История влажности</b>
+              <div class="chart">
+                <div class="bar" style="height:92%"></div>
+                <div class="bar" style="height:84%"></div>
+                <div class="bar" style="height:73%"></div>
+                <div class="bar" style="height:66%"></div>
+                <div class="bar" style="height:60%"></div>
+                <div class="bar" style="height:55%"></div>
+                <div class="bar" style="height:49%"></div>
+                <div class="bar" style="height:43%"></div>
+              </div>
+            </div>
+
+            <div class="plant-card">
+              <b>OLED-мордочка</b>
+              <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+                <div style="width:58px;height:40px;border-radius:10px;background:#061018;color:var(--oled);display:grid;place-items:center;border:1px solid rgba(116,200,255,.18)">◠◡◠</div>
+                <div style="color:var(--muted);font-size:13px">OLED · выбранный стиль</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="roadmap">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="section-kicker">Roadmap</div>
+          <h2>Этапы развития проекта</h2>
+        </div>
+
+        <div class="roadmap">
+          <div class="road-step reveal">
+            <div class="dot">V0</div>
+            <div class="road-content"><b>Электронный макет</b><div style="color:var(--muted);margin-top:6px">STM32, OLED, датчик влажности, аккумулятор и магнитная зарядка.</div></div>
+          </div>
+          <div class="road-step reveal">
+            <div class="dot">V1</div>
+            <div class="road-content"><b>Механический прототип</b><div style="color:var(--muted);margin-top:6px">Smart Head, удлинительные сегменты, Soil Probe и опора для растения.</div></div>
+          </div>
+          <div class="road-step reveal">
+            <div class="dot">V2</div>
+            <div class="road-content"><b>Мобильное приложение</b><div style="color:var(--muted);margin-top:6px">История поливов, профиль растения, настройка устройства и интерфейса.</div></div>
+          </div>
+          <div class="road-step reveal">
+            <div class="dot">V3</div>
+            <div class="road-content"><b>Алгоритм рекомендаций</b><div style="color:var(--muted);margin-top:6px">Анализ динамики влажности и адаптация рекомендаций к конкретному растению.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="section-kicker">Дальнейшее развитие</div>
+          <h2>Функции будущих версий</h2>
+        </div>
+
+        <div class="future">
+          <div class="card reveal"><h3>☀️ Умная подсветка</h3><p>Отдельная система освещения с режимами работы для разных растений и условий.</p></div>
+          <div class="card reveal"><h3>💦 Автополив</h3><p>Логическое продолжение после проверки алгоритма рекомендаций и пользовательских сценариев.</p></div>
+          <div class="card reveal"><h3>🧪 EC-анализ</h3><p>Электропроводимость как дополнительное направление исследований для следующих версий.</p></div>
+          <div class="card reveal"><h3>✨ AI-аналитика</h3><p>Более сложные рекомендации, прогнозирование и персонализация на основе накопленных данных.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="wrap">
+      <div class="footer-title">Lumiq</div>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+      const moisture = document.getElementById('moistureRange');
+      const value = document.getElementById('moistureValue');
+      const statusText = document.getElementById('statusText');
+      const faceScreen = document.getElementById('faceScreen');
+      const heroFace = document.getElementById('heroFace');
+
+      let faceStyle = 'smile';
+
+      function buildFaceSVG(style, state){
+        const stroke = '#74c8ff';
+        const mouthColor = '#74c8ff';
+
+        const layouts = {
+          smile: {
+            dry: `
+              <circle cx="55" cy="52" r="8" fill="${stroke}"/>
+              <circle cx="145" cy="52" r="8" fill="${stroke}"/>
+              <path d="M72 112 Q100 92 128 112" stroke="${mouthColor}" stroke-width="7" stroke-linecap="round" fill="none"/>
+              <path d="M45 32 L65 22" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <path d="M135 22 L155 32" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+            `,
+            ok: `
+              <path d="M44 53 Q55 38 66 53" stroke="${stroke}" stroke-width="6" stroke-linecap="round" fill="none"/>
+              <path d="M134 53 Q145 38 156 53" stroke="${stroke}" stroke-width="6" stroke-linecap="round" fill="none"/>
+              <path d="M68 104 Q100 132 132 104" stroke="${mouthColor}" stroke-width="7" stroke-linecap="round" fill="none"/>
+            `,
+            wet: `
+              <line x1="48" y1="42" x2="64" y2="58" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="64" y1="42" x2="48" y2="58" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="136" y1="42" x2="152" y2="58" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="152" y1="42" x2="136" y2="58" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <path d="M68 118 Q100 88 132 118" stroke="${mouthColor}" stroke-width="7" stroke-linecap="round" fill="none"/>
+            `
+          },
+          cat: {
+            dry: `
+              <polygon points="38,32 58,12 70,38" fill="none" stroke="${stroke}" stroke-width="5" stroke-linejoin="round"/>
+              <polygon points="130,38 142,12 162,32" fill="none" stroke="${stroke}" stroke-width="5" stroke-linejoin="round"/>
+              <ellipse cx="58" cy="55" rx="9" ry="11" fill="none" stroke="${stroke}" stroke-width="5"/>
+              <ellipse cx="142" cy="55" rx="9" ry="11" fill="none" stroke="${stroke}" stroke-width="5"/>
+              <path d="M95 84 L105 84 L100 90 Z" fill="${stroke}"/>
+              <path d="M100 90 Q88 106 79 100" stroke="${stroke}" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M100 90 Q112 106 121 100" stroke="${stroke}" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M30 82 L74 78" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M30 94 L74 90" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M126 78 L170 82" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M126 90 L170 94" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+            `,
+            ok: `
+              <polygon points="38,32 58,12 70,38" fill="none" stroke="${stroke}" stroke-width="5" stroke-linejoin="round"/>
+              <polygon points="130,38 142,12 162,32" fill="none" stroke="${stroke}" stroke-width="5" stroke-linejoin="round"/>
+              <path d="M46 54 Q58 40 70 54" stroke="${stroke}" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M130 54 Q142 40 154 54" stroke="${stroke}" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M95 84 L105 84 L100 90 Z" fill="${stroke}"/>
+              <path d="M100 90 Q86 110 72 94" stroke="${stroke}" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M100 90 Q114 110 128 94" stroke="${stroke}" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M30 82 L74 78" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M30 94 L74 90" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M126 78 L170 82" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M126 90 L170 94" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+            `,
+            wet: `
+              <polygon points="38,32 58,12 70,38" fill="none" stroke="${stroke}" stroke-width="5" stroke-linejoin="round"/>
+              <polygon points="130,38 142,12 162,32" fill="none" stroke="${stroke}" stroke-width="5" stroke-linejoin="round"/>
+              <line x1="48" y1="44" x2="67" y2="62" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="67" y1="44" x2="48" y2="62" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="133" y1="44" x2="152" y2="62" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="152" y1="44" x2="133" y2="62" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <path d="M95 84 L105 84 L100 90 Z" fill="${stroke}"/>
+              <path d="M72 112 Q100 88 128 112" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path d="M30 82 L74 78" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M30 94 L74 90" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M126 78 L170 82" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+              <path d="M126 90 L170 94" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/>
+            `
+          },
+          dog: {
+            dry: `
+              <path d="M44 34 Q32 58 46 76" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path d="M156 34 Q168 58 154 76" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <ellipse cx="60" cy="56" rx="10" ry="12" fill="none" stroke="${stroke}" stroke-width="5"/>
+              <ellipse cx="140" cy="56" rx="10" ry="12" fill="none" stroke="${stroke}" stroke-width="5"/>
+              <ellipse cx="100" cy="86" rx="12" ry="8" fill="none" stroke="${stroke}" stroke-width="5"/>
+              <path d="M82 112 Q100 92 118 112" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+            `,
+            ok: `
+              <path d="M44 34 Q32 58 46 76" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path d="M156 34 Q168 58 154 76" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path d="M49 56 Q60 42 71 56" stroke="${stroke}" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M129 56 Q140 42 151 56" stroke="${stroke}" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <ellipse cx="100" cy="86" rx="12" ry="8" fill="none" stroke="${stroke}" stroke-width="5"/>
+              <path d="M70 106 Q100 132 130 106" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path d="M96 96 L100 104 L104 96" fill="${stroke}"/>
+            `,
+            wet: `
+              <path d="M44 34 Q32 58 46 76" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <path d="M156 34 Q168 58 154 76" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <line x1="50" y1="45" x2="70" y2="64" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="70" y1="45" x2="50" y2="64" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="130" y1="45" x2="150" y2="64" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <line x1="150" y1="45" x2="130" y2="64" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+              <ellipse cx="100" cy="86" rx="12" ry="8" fill="none" stroke="${stroke}" stroke-width="5"/>
+              <path d="M72 114 Q100 88 128 114" stroke="${stroke}" stroke-width="6" fill="none" stroke-linecap="round"/>
+            `
+          }
+        };
+
+        return `
+          <svg class="face-svg" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            ${layouts[style][state]}
+          </svg>
+        `;
+      }
+
+      function stateFromValue(v){
+        if(v < 35) return 'dry';
+        if(v > 75) return 'wet';
+        return 'ok';
+      }
+
+      function render(){
+        const v = Number(moisture.value);
+        const state = stateFromValue(v);
+        value.textContent = v;
+
+        if(state === 'dry'){
+          statusText.textContent = 'Пора полить';
+          statusText.style.color = 'var(--warning)';
+        } else if(state === 'wet'){
+          statusText.textContent = 'Слишком влажно';
+          statusText.style.color = 'var(--danger)';
+        } else {
+          statusText.textContent = 'Всё хорошо';
+          statusText.style.color = 'var(--success)';
+        }
+
+        faceScreen.innerHTML = buildFaceSVG(faceStyle, state);
+        heroFace.innerHTML = buildFaceSVG(faceStyle, state);
+      }
+
+      moisture.addEventListener('input', render);
+
+      document.querySelectorAll('[data-face]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-face]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          faceStyle = btn.dataset.face;
+          render();
+        });
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
